@@ -13,7 +13,7 @@ const blogData = {
     bio: "IT Intern di PT Laksita Emi Saguna yang berfokus pada pengujian sistem (Testcase), perancangan User Flow, diagram proses bisnis, technical flowmap, penyusunan User Guide 8-Role, serta pengembangan modul pada ekosistem SIM Perencanaan, SIM Penganggaran, dan SIM Keuangan Universitas Mahasaraswati (UNMAS).",
     location: "Denpasar, Bali, Indonesia",
     email: "ghyovaspurba@gmail.com",
-    github: "https://github.com",
+    github: "https://github.com/ghyovasdiaz",
     linkedin: "https://linkedin.com",
     instagram: "https://instagram.com",
     badges: [
