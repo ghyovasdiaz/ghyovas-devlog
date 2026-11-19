@@ -1,0 +1,4 @@
+# GitHub Linguist Language Detection
+# Mark JS and CSS as vendored/support files so GitHub displays this repository primarily as HTML
+*.js linguist-vendored
+*.css linguist-vendored

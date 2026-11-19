@@ -58,78 +58,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastNotice = document.getElementById('toast-notice');
 
   // ============================================================
-  // 1. Render Weekly Posts Cards Grid
+  // 1. Weekly Posts Cards Grid & Visibility
   // ============================================================
-  function getSortedPosts() {
-    const order = sortOrderSelect ? sortOrderSelect.value : 'newest';
-    const sorted = [...allPosts];
-    if (order === 'oldest') {
-      return sorted.sort((a, b) => a.weekNumber - b.weekNumber);
-    } else {
-      return sorted.sort((a, b) => b.weekNumber - a.weekNumber);
-    }
-  }
-
-  function renderPosts() {
+  function updatePostVisibility() {
     if (!postsGrid) return;
-    postsGrid.innerHTML = '';
-
-    const sorted = getSortedPosts();
-    const postsToDisplay = sorted.slice(0, displayedPostsCount);
-
-    postsToDisplay.forEach(post => {
-      const card = document.createElement('article');
-      card.className = 'post-card';
-      card.setAttribute('data-id', post.id);
-
-      const displayDate = post.dateRange ? `${post.dateRange}` : post.date;
-
-      card.innerHTML = `
-        <div class="post-card-thumb-wrapper">
-          <img src="${post.thumbnail}" alt="${post.title}" class="post-card-thumb-img" loading="lazy" />
-        </div>
-        <div class="post-card-content">
-          <h3 class="post-card-title">${post.title}</h3>
-          <p class="post-card-excerpt">${post.excerpt}</p>
-        </div>
-        <div class="post-card-footer">
-          <span class="post-card-date">${displayDate}</span>
-          <span class="post-card-author">${post.author}</span>
-        </div>
-      `;
-
-      card.addEventListener('click', () => openPostReader(post));
-      postsGrid.appendChild(card);
+    const cards = postsGrid.querySelectorAll('.post-card');
+    cards.forEach((card, index) => {
+      card.style.display = index < displayedPostsCount ? '' : 'none';
     });
 
-    // Update Load More Button visibility & text
     if (loadMoreBtn) {
-      if (displayedPostsCount >= allPosts.length) {
+      if (displayedPostsCount >= cards.length) {
         loadMoreBtn.innerText = 'Semua 13 Minggu Ditampilkan';
         loadMoreBtn.style.opacity = '0.6';
         loadMoreBtn.style.cursor = 'default';
       } else {
-        loadMoreBtn.innerText = `Muat Lebih Banyak (${displayedPostsCount}/${allPosts.length} Minggu)`;
+        loadMoreBtn.innerText = `Muat Lebih Banyak (${displayedPostsCount}/${cards.length} Minggu)`;
         loadMoreBtn.style.opacity = '1';
         loadMoreBtn.style.cursor = 'pointer';
       }
     }
   }
 
+  // Click delegation for post cards
+  if (postsGrid) {
+    postsGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.post-card');
+      if (!card) return;
+      const postId = parseInt(card.getAttribute('data-id'), 10);
+      const post = allPosts.find(p => p.id === postId);
+      if (post) {
+        openPostReader(post);
+      }
+    });
+  }
+
   // Sort Order Selector Event
-  if (sortOrderSelect) {
+  if (sortOrderSelect && postsGrid) {
     sortOrderSelect.addEventListener('change', () => {
-      renderPosts();
+      const order = sortOrderSelect.value;
+      const cards = Array.from(postsGrid.querySelectorAll('.post-card'));
+      cards.sort((a, b) => {
+        const idA = parseInt(a.getAttribute('data-id'), 10);
+        const idB = parseInt(b.getAttribute('data-id'), 10);
+        return order === 'oldest' ? idA - idB : idB - idA;
+      });
+      cards.forEach(c => postsGrid.appendChild(c));
+      updatePostVisibility();
       showToast(`Mengurutkan: ${sortOrderSelect.options[sortOrderSelect.selectedIndex].text}`);
     });
   }
 
   // Load More Button Event
-  if (loadMoreBtn) {
+  if (loadMoreBtn && postsGrid) {
     loadMoreBtn.addEventListener('click', () => {
-      if (displayedPostsCount < allPosts.length) {
-        displayedPostsCount = Math.min(displayedPostsCount + 4, allPosts.length);
-        renderPosts();
+      const cards = postsGrid.querySelectorAll('.post-card');
+      if (displayedPostsCount < cards.length) {
+        displayedPostsCount = Math.min(displayedPostsCount + 4, cards.length);
+        updatePostVisibility();
         showToast(`Memuat catatan mingguan tambahan...`);
       }
     });
@@ -202,10 +188,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ============================================================
-  // 4. Render Projects Grid
+  // 4. Render Projects Grid (Fallback if empty)
   // ============================================================
   function renderProjects() {
-    if (!projectsGrid) return;
+    if (!projectsGrid || projectsGrid.children.length > 0) return;
     projectsGrid.innerHTML = '';
 
     blogData.projects.forEach(project => {
@@ -533,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================================================
   function renderDokumentasi() {
     const container = document.getElementById('docs-grid');
-    if (!container || !blogData.dokumentasi) return;
+    if (!container || container.children.length > 0 || !blogData.dokumentasi) return;
 
     const kategoriColor = {
       'Logbook':       { bg: '#EFF6FF', border: '#BFDBFE', text: '#1D4ED8' },
@@ -579,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initialize
-  renderPosts();
+  updatePostVisibility();
   renderProjects();
   renderDokumentasi();
 });
