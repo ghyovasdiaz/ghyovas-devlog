@@ -1,4 +1,11 @@
-# GitHub Linguist Language Detection
-# Mark JS and CSS as vendored/support files so GitHub displays this repository primarily as HTML
-*.js linguist-vendored
-*.css linguist-vendored
+# GitHub Linguist Overrides
+# Exclude JavaScript and CSS from repository language stats
+js/* linguist-vendored=true
+js/** linguist-vendored=true
+css/* linguist-vendored=true
+css/** linguist-vendored=true
+*.js linguist-vendored=true
+*.css linguist-vendored=true
+
+# Force HTML to be primary
+*.html linguist-detectable=true
